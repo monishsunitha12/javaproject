@@ -16,3 +16,10 @@
 # Virtual machine crash logs
 hs_err_pid*
 replay_pid*
+
+# IDE specific
+.idea/
+*.iml
+out/
+.vscode/
+bin/
