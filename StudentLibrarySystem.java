@@ -169,7 +169,7 @@ class DatabaseConnection {
         return DriverManager.getConnection(dbUrl);
     }
 
-    // Initialize database table 'books' and seed initial records directly via SQL (NO ARRAYS)
+    // Initialize database table 'books' and seed default records directly via SQL (NO ARRAYS)
     public static void initializeDatabase() {
         String createTableSql = "CREATE TABLE IF NOT EXISTS books (" +
                 "bookId INTEGER PRIMARY KEY, " +
@@ -183,7 +183,7 @@ class DatabaseConnection {
 
             stmt.execute(createTableSql);
 
-            // Check if table is empty; if so, populate initial records directly via SQL
+            // Check if table is empty; if so, populate default seed records directly via SQL
             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM books");
             if (rs.next() && rs.getInt(1) == 0) {
                 stmt.executeUpdate("INSERT INTO books (bookId, bookName, author, issued) VALUES (101, 'Java Programming', 'James Gosling', 0)");
@@ -246,7 +246,7 @@ class AddBook {
                 insertStmt.setString(3, author);
                 insertStmt.executeUpdate();
 
-                System.out.println("\nBook added successfully and saved permanently to library database!");
+                System.out.println("\nBook added successfully!");
             }
 
         } catch (SQLException e) {
@@ -272,7 +272,7 @@ class DisplayBooks {
             // Stream and render each book directly from database cursor (NO ARRAYS)
             while (rs.next()) {
                 if (!hasBooks) {
-                    System.out.println("\n===== BOOK LIST (LIBRARY DATABASE) =====");
+                    System.out.println("\n===== BOOK LIST =====");
                     hasBooks = true;
                 }
 
@@ -286,7 +286,7 @@ class DisplayBooks {
             }
 
             if (!hasBooks) {
-                System.out.println("\nNo books available in the database.");
+                System.out.println("\nNo books available.");
             }
 
         } catch (SQLException e) {
@@ -296,7 +296,155 @@ class DisplayBooks {
 }
 
 // =========================================================================
-// 6. Main Class: StudentLibrarySystem (Interactive Menu - Single Click Ready)
+// 6. Option 3: Search Book (Direct SQL Query in Real Time - NO ARRAYS)
+// =========================================================================
+class SearchBook {
+
+    public static void execute(Scanner sc) {
+        System.out.print("Enter Book ID to search: ");
+        int id = sc.nextInt();
+
+        String query = "SELECT bookId, bookName, author, issued FROM books WHERE bookId = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+            pstmt.setInt(1, id);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    System.out.println("\nBook Found");
+                    int bookId = rs.getInt("bookId");
+                    String name = rs.getString("bookName");
+                    String author = rs.getString("author");
+                    boolean issued = (rs.getInt("issued") == 1);
+
+                    Book book = new Book(bookId, name, author, issued);
+                    book.displayBook();
+                } else {
+                    System.out.println("Book not found!");
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("\n[Database Error] Search failed: " + e.getMessage());
+        }
+    }
+}
+
+// =========================================================================
+// 7. Option 4: Issue Book (Direct SQL UPDATE in Real Time - NO ARRAYS)
+// =========================================================================
+class IssueBook {
+
+    public static void execute(Scanner sc) {
+        System.out.print("Enter Book ID to issue: ");
+        int id = sc.nextInt();
+
+        String selectSql = "SELECT issued FROM books WHERE bookId = ?";
+        String updateSql = "UPDATE books SET issued = 1 WHERE bookId = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement selectStmt = conn.prepareStatement(selectSql)) {
+
+            selectStmt.setInt(1, id);
+            try (ResultSet rs = selectStmt.executeQuery()) {
+                if (rs.next()) {
+                    boolean issued = (rs.getInt("issued") == 1);
+                    if (!issued) {
+                        try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
+                            updateStmt.setInt(1, id);
+                            updateStmt.executeUpdate();
+                            System.out.println("Book issued successfully!");
+                        }
+                    } else {
+                        System.out.println("Book is already issued.");
+                    }
+                } else {
+                    System.out.println("Book not found!");
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("\n[Database Error] Issue failed: " + e.getMessage());
+        }
+    }
+}
+
+// =========================================================================
+// 8. Option 5: Return Book (Direct SQL UPDATE in Real Time - NO ARRAYS)
+// =========================================================================
+class ReturnBook {
+
+    public static void execute(Scanner sc) {
+        System.out.print("Enter Book ID to return: ");
+        int id = sc.nextInt();
+
+        String selectSql = "SELECT issued FROM books WHERE bookId = ?";
+        String updateSql = "UPDATE books SET issued = 0 WHERE bookId = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement selectStmt = conn.prepareStatement(selectSql)) {
+
+            selectStmt.setInt(1, id);
+            try (ResultSet rs = selectStmt.executeQuery()) {
+                if (rs.next()) {
+                    boolean issued = (rs.getInt("issued") == 1);
+                    if (issued) {
+                        try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
+                            updateStmt.setInt(1, id);
+                            updateStmt.executeUpdate();
+                            System.out.println("Book returned successfully!");
+                        }
+                    } else {
+                        System.out.println("Book was not issued.");
+                    }
+                } else {
+                    System.out.println("Book not found!");
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("\n[Database Error] Return failed: " + e.getMessage());
+        }
+    }
+}
+
+// =========================================================================
+// 9. Option 6: Delete Book (Direct SQL DELETE in Real Time - NO ARRAYS)
+// =========================================================================
+class DeleteBook {
+
+    public static void execute(Scanner sc) {
+        System.out.print("Enter Book ID to delete: ");
+        int id = sc.nextInt();
+
+        String selectSql = "SELECT COUNT(*) FROM books WHERE bookId = ?";
+        String deleteSql = "DELETE FROM books WHERE bookId = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement selectStmt = conn.prepareStatement(selectSql)) {
+
+            selectStmt.setInt(1, id);
+            try (ResultSet rs = selectStmt.executeQuery()) {
+                if (rs.next() && rs.getInt(1) > 0) {
+                    try (PreparedStatement deleteStmt = conn.prepareStatement(deleteSql)) {
+                        deleteStmt.setInt(1, id);
+                        deleteStmt.executeUpdate();
+                        System.out.println("Book deleted successfully!");
+                    }
+                } else {
+                    System.out.println("Book not found!");
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("\n[Database Error] Delete failed: " + e.getMessage());
+        }
+    }
+}
+
+// =========================================================================
+// 10. Main Class: StudentLibrarySystem (Full Interactive Menu - Single Click Ready)
 // =========================================================================
 public class StudentLibrarySystem {
 
@@ -306,26 +454,29 @@ public class StudentLibrarySystem {
 
         int choice;
 
-        // Ensure database table 'books' exists and is ready in real time (NO ARRAYS)
+        // Ensure database table 'books' exists and default books are seeded (NO ARRAYS)
         DatabaseConnection.initializeDatabase();
 
         do {
 
             System.out.println("\n=================================");
             System.out.println("      STUDENT LIBRARY SYSTEM");
-            System.out.println("     (Database Real-Time Mode)");
             System.out.println("=================================");
 
             System.out.println("1. Add Book");
             System.out.println("2. Display Books");
-            System.out.println("3. Exit");
+            System.out.println("3. Search Book");
+            System.out.println("4. Issue Book");
+            System.out.println("5. Return Book");
+            System.out.println("6. Delete Book");
+            System.out.println("7. Exit");
 
             System.out.println("=================================");
 
             System.out.print("Enter your choice: ");
 
             if (!sc.hasNextInt()) {
-                System.out.println("\nInvalid choice! Please enter a number.");
+                System.out.println("\nInvalid choice! Please try again.");
                 sc.nextLine();
                 choice = 0;
                 continue;
@@ -336,17 +487,30 @@ public class StudentLibrarySystem {
             switch (choice) {
 
                 case 1:
-                    // Option 1: Add Book directly to database
                     AddBook.execute(sc);
                     break;
 
                 case 2:
-                    // Option 2: Display Books directly from database
                     DisplayBooks.execute();
                     break;
 
                 case 3:
-                    // Option 3: Exit
+                    SearchBook.execute(sc);
+                    break;
+
+                case 4:
+                    IssueBook.execute(sc);
+                    break;
+
+                case 5:
+                    ReturnBook.execute(sc);
+                    break;
+
+                case 6:
+                    DeleteBook.execute(sc);
+                    break;
+
+                case 7:
                     System.out.println(
                         "\nThank you for using Student Library System!"
                     );
@@ -358,7 +522,7 @@ public class StudentLibrarySystem {
                     );
             }
 
-        } while (choice != 3);
+        } while (choice != 7);
 
         sc.close();
     }
