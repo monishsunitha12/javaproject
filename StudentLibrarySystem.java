@@ -1,10 +1,8 @@
-import java.util.ArrayList;
 import java.util.Scanner;
 
-// Main class
+// Main class - Student Library System (with MSSQL Server Persistence)
 public class StudentLibrarySystem {
 
-    static ArrayList<Book> books = new ArrayList<>();
     static Scanner sc = new Scanner(System.in);
 
     // Main method
@@ -12,27 +10,14 @@ public class StudentLibrarySystem {
 
         int choice;
 
-        // Sample books
-        books.add(new Book(101, "Java Programming", "James Gosling"));
-        books.add(new Book(102, "Python Programming", "Guido van Rossum"));
-        books.add(new Book(103, "Data Structures", "Mark Allen Weiss"));
-        books.add(new Book(104, "General Science", "R.K. Sharma"));
-        books.add(new Book(105, "Mathematics", "R.D. Sharma"));
-        books.add(new Book(106, "Physics", "H.C. Verma"));
-        books.add(new Book(107, "Botany", "B.P. Pandey"));
-        books.add(new Book(108, "Chemistry", "P. Bahadur"));
-        books.add(new Book(109, "Biology", "Trueman"));
-        books.add(new Book(110, "Computer Science", "Sanjay Kumar"));
-        books.add(new Book(111, "English Literature", "R.K. Narayan"));
-        books.add(new Book(112, "History", "R.S. Sharma"));
-        books.add(new Book(113, "Geography", "Majid Hussain"));
-        books.add(new Book(114, "Environmental Science", "Erach Bharucha"));
-        books.add(new Book(115, "Zoology", "S.S. Lal"));
+        System.out.println("Connecting to Microsoft SQL Server...");
+        DatabaseConnection.initializeDatabase();
 
         do {
 
             System.out.println("\n=================================");
             System.out.println("      STUDENT LIBRARY SYSTEM");
+            System.out.println("    (MSSQL Database Persistent)");
             System.out.println("=================================");
 
             System.out.println("1. Add Book");
@@ -55,14 +40,17 @@ public class StudentLibrarySystem {
             switch (choice) {
 
                 case 1:
-                    AddBook.execute(books, sc);
+                    // Option 1: Add Book to MSSQL Database
+                    AddBook.execute(sc);
                     break;
 
                 case 2:
-                    DisplayBooks.execute(books);
+                    // Option 2: Display Books from MSSQL Database
+                    DisplayBooks.execute();
                     break;
 
                 case 3:
+                    // Option 3: Exit
                     System.out.println(
                         "\nThank you for using Student Library System!"
                     );

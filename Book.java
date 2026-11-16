@@ -5,12 +5,20 @@ public class Book {
     public String author;
     public boolean issued;
 
-    // Constructor
+    // Constructor for new books (default issued = false)
     public Book(int bookId, String bookName, String author) {
         this.bookId = bookId;
         this.bookName = bookName;
         this.author = author;
         this.issued = false;
+    }
+
+    // Overloaded Constructor for books loaded from database
+    public Book(int bookId, String bookName, String author, boolean issued) {
+        this.bookId = bookId;
+        this.bookName = bookName;
+        this.author = author;
+        this.issued = issued;
     }
 
     // Display book details
