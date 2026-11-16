@@ -1,6 +1,6 @@
 import java.util.Scanner;
 
-// Main class - Student Library System (with MSSQL Server Persistence)
+// Main class - Student Library System (Database Persistent & Real-Time)
 public class StudentLibrarySystem {
 
     static Scanner sc = new Scanner(System.in);
@@ -10,14 +10,14 @@ public class StudentLibrarySystem {
 
         int choice;
 
-        System.out.println("Connecting to Microsoft SQL Server...");
+        // Ensure database table 'books' exists and is ready in real time (NO ARRAYS USED)
         DatabaseConnection.initializeDatabase();
 
         do {
 
             System.out.println("\n=================================");
             System.out.println("      STUDENT LIBRARY SYSTEM");
-            System.out.println("    (MSSQL Database Persistent)");
+            System.out.println("     (Database Real-Time Mode)");
             System.out.println("=================================");
 
             System.out.println("1. Add Book");
@@ -40,12 +40,12 @@ public class StudentLibrarySystem {
             switch (choice) {
 
                 case 1:
-                    // Option 1: Add Book to MSSQL Database
+                    // Option 1: Add Book directly to database
                     AddBook.execute(sc);
                     break;
 
                 case 2:
-                    // Option 2: Display Books from MSSQL Database
+                    // Option 2: Display Books directly from database
                     DisplayBooks.execute();
                     break;
 

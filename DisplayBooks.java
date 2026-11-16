@@ -3,7 +3,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-// Option 2: Display Books (Executable with MSSQL Database Persistence)
+// Option 2: Display Books (Executable - Real-time Database Access)
 public class DisplayBooks {
 
     public static final boolean IS_EXECUTABLE = true;
@@ -17,16 +17,17 @@ public class DisplayBooks {
 
             boolean hasBooks = false;
 
+            // Fetch and render each record directly from the database in real time (NO ARRAYS)
             while (rs.next()) {
                 if (!hasBooks) {
-                    System.out.println("\n===== BOOK LIST (MSSQL DATABASE) =====");
+                    System.out.println("\n===== BOOK LIST (LIBRARY DATABASE) =====");
                     hasBooks = true;
                 }
 
                 int id = rs.getInt("bookId");
                 String name = rs.getString("bookName");
                 String author = rs.getString("author");
-                boolean issued = rs.getBoolean("issued");
+                boolean issued = (rs.getInt("issued") == 1);
 
                 Book book = new Book(id, name, author, issued);
                 book.displayBook();
@@ -37,8 +38,7 @@ public class DisplayBooks {
             }
 
         } catch (SQLException e) {
-            System.err.println("\n[Database Error] Failed to fetch books from MSSQL: " + e.getMessage());
-            System.err.println("Please verify your MSSQL Server status and 'db.properties'.");
+            System.err.println("\n[Database Error] Failed to fetch books from database: " + e.getMessage());
         }
     }
 }

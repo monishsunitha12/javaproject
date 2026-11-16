@@ -4,7 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Scanner;
 
-// Option 1: Add Book (Executable with MSSQL Database Persistence)
+// Option 1: Add Book (Executable - Real-time Database Persistent Storage)
 public class AddBook {
 
     public static final boolean IS_EXECUTABLE = true;
@@ -24,7 +24,7 @@ public class AddBook {
         String insertSql = "INSERT INTO books (bookId, bookName, author, issued) VALUES (?, ?, ?, 0)";
 
         try (Connection conn = DatabaseConnection.getConnection()) {
-            // Check for duplicate ID
+            // Check for duplicate ID in database
             try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
                 checkStmt.setInt(1, id);
                 ResultSet rs = checkStmt.executeQuery();
@@ -34,19 +34,18 @@ public class AddBook {
                 }
             }
 
-            // Insert new book into database
+            // Directly insert into the library database in real time (NO ARRAYS)
             try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
                 insertStmt.setInt(1, id);
                 insertStmt.setString(2, name);
                 insertStmt.setString(3, author);
                 insertStmt.executeUpdate();
 
-                System.out.println("\nBook added successfully and saved permanently to database!");
+                System.out.println("\nBook added successfully and saved permanently to library database!");
             }
 
         } catch (SQLException e) {
-            System.err.println("\n[Database Error] Failed to save book to MSSQL: " + e.getMessage());
-            System.err.println("Please verify your MSSQL Server status and 'db.properties'.");
+            System.err.println("\n[Database Error] Failed to save book to database: " + e.getMessage());
         }
     }
 }
